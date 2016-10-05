@@ -26,13 +26,13 @@ local function enable_channel(receiver, to_id)
 	end
 
 	if _config.disabled_channels[receiver] == nil then
-		return 'Bot was on :D'
+		return 'ℹسلف بات در این گروه\nفعال شد❗'
 	end
 	
 	_config.disabled_channels[receiver] = false
 
 	save_config()
-	return 'Bot was on :D'
+	return '❗سلف بات روشن بود❗'
 end
 
 local function disable_channel(receiver, to_id)
@@ -43,7 +43,7 @@ local function disable_channel(receiver, to_id)
 	_config.disabled_channels[receiver] = true
 
 	save_config()
-	return 'Bot was off ;-/'
+	return 'سلف فات در این گروه خاموش شد❗'
 end
 
 local function pre_process(msg)
@@ -99,11 +99,12 @@ end
 
 return {
 	patterns = {
-	    "^#bot? (on)$",
-            "^#bot? (off)$",
-	    "^#bot? (up)$",
-	    "^#bot (rl)$",
+	    "^[!/#]bot? (on)$",
+            "^[!/#]bot? (off)$",
+	    "^[!/#]bot? (up)$",
+	    "^[!/#]bot (rl)$",
 	    },
 	run = run,
 	pre_process = pre_process
 }
+-
