@@ -11,14 +11,15 @@ local function run(msg, matches)
   file:write(text)
   file:flush()
   file:close()
-  return "Done ;-)" 
+  return "پلاگین با نام\n"..name.."با موفقیت ادد شد!" 
 end
 end 
 return {
   description = "a Usefull plugin for sudo !",  
   usage = "A plugins to add Another plugins to the server",
   patterns = {
-    "^#addplug +(.+) (.*)$"
+    "^[!/#]addplug +(.+) (.*)$"
   },
   run = run
 }
+-
