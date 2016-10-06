@@ -28,7 +28,7 @@ local function kick_user(user_id, chat_id)
     local user = 'user#id'..user_id
     local channel = 'channel#id'..chat_id
     if user_id == tostring(our_id) then
-        print("I won't kick myself!")
+        print("به نظرت میتونی خودتو کیک کنی؟!:|")
     else
         chat_del_user(chat, user, ok_cb, true)
         channel_kick_user(channel, user, ok_cb, true)
@@ -59,7 +59,7 @@ local function kick_by_username(cb_extra, success, result)
 end
 
 local function run(msg, matches)
-       if matches[1] == 'setname' then
+       if matches[1] == 'setname' or 'تنظیم اسم' then
         if permissions(msg.from.id, msg.to.id, "settings") then
             local hash = 'name:enabled:'..msg.to.id
             if not redis:get(hash) then
@@ -71,7 +71,7 @@ local function run(msg, matches)
             end
             return
         end
-    elseif matches[1] == 'newlink' then
+    elseif matches[1] == 'newlink' or 'لینک جدید' then
         if permissions(msg.from.id, msg.to.id, "setlink") then
         	local receiver = get_receiver(msg)
             local hash = 'link:'..msg.to.id
@@ -80,7 +80,7 @@ local function run(msg, matches)
     				redis:set(hash, result)
     			end
 	            if success == 0 then
-	                return send_large_msg(receiver, 'Error*\nnewlink not saved\nYou are not the group administrator', ok_cb, true)
+	                return send_large_msg(receiver, 'ارور! یا شما سازنده گروه نیستید یا هنوز لینک نساخته اید\nلینک جدید یا newlink\nرا بزنید!', ok_cb, true)
 	            end
     		end
     		if msg.to.type == 'chat' then
@@ -99,36 +99,36 @@ local function run(msg, matches)
         else
             return '?? '..lang_text(msg.to.id, 'require_admin')
         end
-    elseif matches[1] == 'link' then
+    elseif matches[1] == 'link' or 'لینک' then
         if permissions(msg.from.id, msg.to.id, "link") then
             hash = 'link:'..msg.to.id
             local linktext = redis:get(hash)
             if linktext then
                 if msg.to.type == 'chat' then
-                    send_msg('user#id'..msg.from.id, 'Group Link :'..linktext, ok_cb, true)
+                    send_msg('user#id'..msg.from.id, 'لینک برای گروه\n'..mag.to.title..'\n'..linktext, ok_cb, true)
                 elseif msg.to.type == 'channel' then
-                    send_msg('user#id'..msg.from.id, 'SuperGroup Link :'..linktext, ok_cb, true)
+                    send_msg('user#id'..msg.from.id, 'لینک برای سوپر گروه\n'..msg.to.title..'\n'..linktext, ok_cb, true)
                 end
-                return 'Link was sent in your pv'
+                return 'لینک به پیوی ارسال شد.'
             else
                 if msg.to.type == 'chat' then
-                    send_msg('chat#id'..msg.to.id, 'Error*\nplease send #newlink', ok_cb, true)
+                    send_msg('chat#id'..msg.to.id, 'ارور!ابتدا لینک جدید بسازید\n!newlink یا لینک جدید.', ok_cb, true)
                 elseif msg.to.type == 'channel' then
-                    send_msg('channel#id'..msg.to.id, 'Error*\nplease send #newlink', ok_cb, true)
+                    send_msg('channel#id'..msg.to.id, 'خطا!ابتدا لینک جدید برای سوپر گروه بسازید دستور:\nلینک جدید یا newlink', ok_cb, true)
                 end
             end
             return
         end
-    elseif matches[1] == 'tosuper' then
+    elseif matches[1] == 'tosuper' or 'تبدیل سوپر' then
         if msg.to.type == 'chat' then
             if permissions(msg.from.id, msg.to.id, "tosupergroup") then
                 chat_upgrade('chat#id'..msg.to.id, ok_cb, false)
-                return 'Chat Upgraded Successfully.'
+                return 'گروه |'..msg.to.title..'|به سوپر گروه تبدیل شد.'
             end
         else
-            return 'Error !'
+            return 'خطا در ارتقا گروه\nدلیل:\nشما سازنده گروه نیستید!'
         end
-            elseif matches[1] == 'rmv' then
+            elseif matches[1] == 'kick' or 'اخراج' then
         if permissions(msg.from.id, msg.to.id, "kick") then
             local chat_id = msg.to.id
             local chat_type = msg.to.type
@@ -146,10 +146,11 @@ local function run(msg, matches)
                     chat_del_user('chat#id'..msg.to.id, 'user#id'..matches[2], ok_cb, false)
                 elseif msg.to.type == 'channel' then
                     channel_kick_user('channel#id'..msg.to.id, 'user#id'..matches[2], ok_cb, false)
+                    return "فرد نسبتا محترم از گروه شما اخراج شد."
                 end
             end
         end
-            elseif matches[1] == 'add' then
+            elseif matches[1] == 'add' or 'ادد' then
         if permissions(msg.from.id, msg.to.id, "add") then
             local chat_id = msg.to.id
             local chat_type = msg.to.type
@@ -171,31 +172,48 @@ local function run(msg, matches)
               end
             end
     end
-    elseif matches[1] == 'setdes' then
+    elseif matches[1] == 'setdes' or 'تنظیم درباره' then
         if permissions(msg.from.id, msg.to.id, "description") then
             local text = matches[2]
             local chat = 'channel#id'..msg.to.id
             if msg.to.type == 'channel' then
                 channel_set_about(chat, text, ok_cb, false)
-                return 'changed.'
+                return 'با موفقیت تنظیم شد😉'
             end
         end
 end
 end
 return {
     patterns = {
-        '^#(setname) (.*)$',
-        '^#(link)$',
-        '^#(newlink)$',
-        '^#(tosuper)$',
-        '^#(setdes) (.*)$',
-        "^#(rmv)$",
-        "^#(rmv) (.*)$",
-        "^#(add)$",
-        "^#(add) (.*)$",
+        '^[!/#](setname) (.*)$',
+        '^(setname) (.*)$',
+        '^(تنظیم اسم) (.*)$',
+        '^[!/#](link)$',
+        '^(link)$',
+        '^(لینک)"',
+        '^[!/#](newlink)$',
+        '^(newlink)$',
+        '^(لینک جدید)$',
+        '^[!/#](tosuper)$',
+        '^(tosuper)$',
+        '^(تبدیل سوپر)$',
+        '^[!/#](setdes) (.*)$',
+        '^(setdes) (.*)$',
+        '^(تنظیم درباره) (.*)$',
+        "^[!/#](kick)$",
+        "^(kick)$",
+        "^(اخراج)$",
+        "^[!/#](kick) (.*)$",
+        "^(kick) (.*)$",
+        "^(اخراج) (.*)$",
+        "^[!/#](add)$",
+        "^(add)$",
+        "^(ادد)$",
+        "^[!/#](add) (.*)$",
+        "^(add) (.*)$",
+        "^(ادد) (.*)$",
     },
     run = run
 }
 end
-
-
+-- Create By Mr.Nitro
